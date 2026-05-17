@@ -1,7 +1,14 @@
 module.exports = {
-    PREFIX: ".",
-    AUTO_READ_STATUS: true,
-    AUTO_REACT: false,
-    AUTO_TYPING: false,
-    REACT_EMOJIS: ['❤','💕','😻','🧡','💛','💚','💙','💜','🎉','👋']
+PREFIX: ".",
+BOT_NAME: "GIMA MD",
+OWNER_NAME: "PAWAN",
+OWNER_NUMBER: "94762964170",
+ALIVE_MSG: "GIMA MD IS ONLINE ✅",
+STICKER_NAME: "GIMA PACK",
+
+AUTO_READ_STATUS: true,
+AUTO_REACT: false,
+AUTO_TYPING: false,
+
+REACT_EMOJIS: ['🖤','💕','😻','🧡','💛','💚','💙']
 };
