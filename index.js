@@ -1,20 +1,12 @@
+const express = require("express")
 const {
   default: makeWASocket,
   useMultiFileAuthState
 } = require("@whiskeysockets/baileys")
 
-const P = require("pino")
-const express = require("express")
-
 const app = express()
 
-app.get("/", (req, res) => {
-  res.send("GIMA-MD RUNNING")
-})
-
-app.listen(3000, () => {
-  console.log("Server Started")
-})
+let latestCode = "Loading..."
 
 async function startBot() {
 
@@ -22,55 +14,51 @@ async function startBot() {
     await useMultiFileAuthState("session")
 
   const sock = makeWASocket({
-    logger: P({ level: "silent" }),
-    auth: state,
-    browser: ["GIMA-MD", "Chrome", "1.0.0"]
+    auth: state
   })
 
   sock.ev.on("creds.update", saveCreds)
 
   if (!sock.authState.creds.registered) {
 
-    const phoneNumber = "94762964170"
+    const number = "94762964170"
 
-    const code = await sock.requestPairingCode(phoneNumber)
+    const code = await sock.requestPairingCode(number)
 
-    console.log(`
-PAIR CODE: ${code}
-`)
+    latestCode = code
+
+    console.log("PAIR CODE:", code)
   }
 
-  sock.ev.on("connection.update", async ({ connection }) => {
+  sock.ev.on("connection.update", ({ connection }) => {
 
     if (connection === "open") {
-      console.log("BOT CONNECTED")
+      console.log("Connected")
     }
 
     if (connection === "close") {
-      console.log("RECONNECTING...")
       startBot()
     }
   })
-
-  sock.ev.on("messages.upsert", async (m) => {
-
-    const msg = m.messages[0]
-
-    if (!msg.message) return
-
-    const text =
-      msg.message.conversation ||
-      msg.message.extendedTextMessage?.text
-
-    const from = msg.key.remoteJid
-
-    if (text === ".ping") {
-
-      await sock.sendMessage(from, {
-        text: "Pong 🟢"
-      })
-    }
-  })
 }
+
+app.get("/", (req, res) => {
+
+  res.send(`
+    <html>
+      <head>
+        <title>GIMA PAIR CODE</title>
+      </head>
+      <body style="background:black;color:white;text-align:center;padding-top:100px;font-family:sans-serif;">
+        <h1>GIMA-MD PAIR CODE</h1>
+        <h2>${latestCode}</h2>
+      </body>
+    </html>
+  `)
+})
+
+app.listen(3000, () => {
+  console.log("Server running")
+})
 
 startBot()
