@@ -1,6 +1,6 @@
 {
-  "name": "dina-bot",
-  "version": "1.0.0",
+  "name": "GIMA-MD",
+  "version": "6.0.0",
   "description": "Multi-session WhatsApp Bot with Plugin System",
   "main": "pair.js",
   "scripts": {
