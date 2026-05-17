@@ -1,83 +1,115 @@
-const express = require("express")
-
+const express = require("express");
+const axios = require("axios");
 const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  DisconnectReason,
-  delay
-} = require("@whiskeysockets/baileys")
+    default: makeWASocket,
+    useMultiFileAuthState,
+    DisconnectReason
+} = require("@whiskeysockets/baileys");
 
-const app = express()
-
-const PORT = process.env.PORT || 3000
-
-let latestCode = "Loading..."
+// =====================
+// KEEP ALIVE SERVER
+// =====================
+const app = express();
 
 app.get("/", (req, res) => {
-  res.send(`
-  <html>
-    <body style="background:black;color:white;text-align:center;padding-top:100px;font-family:sans-serif;">
-      <h1>PAIR CODE</h1>
-      <h2>${latestCode}</h2>
-    </body>
-  </html>
-  `)
-})
+    res.send("GIMA-MD Bot is Running ✅");
+});
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Server Running")
-})
+    console.log("🌐 Server running on port " + PORT);
+});
 
+// =====================
+// MAIN BOT FUNCTION
+// =====================
 async function startBot() {
+    const { state, saveCreds } = await useMultiFileAuthState("./auth");
 
-  const { state, saveCreds } =
-    await useMultiFileAuthState("./session")
+    const sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true,
+        browser: ["GIMA-MD", "Chrome", "1.0.0"]
+    });
 
-  const sock = makeWASocket({
-    auth: state
-  })
+    // Save session
+    sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on("creds.update", saveCreds)
+    // Connection update (auto reconnect fix)
+    sock.ev.on("connection.update", (update) => {
+        const { connection, lastDisconnect } = update;
 
-  let requested = false
+        if (connection === "close") {
+            const shouldReconnect =
+                lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
 
-  sock.ev.on("connection.update", async (update) => {
+            console.log("Connection closed. Reconnecting...", shouldReconnect);
 
-    const { connection, lastDisconnect } = update
+            if (shouldReconnect) {
+                startBot();
+            }
+        } else if (connection === "open") {
+            console.log("✅ Bot Connected Successfully");
+        }
+    });
 
-    if (connection === "open") {
+    // =====================
+    // MESSAGE HANDLER
+    // =====================
+    sock.ev.on("messages.upsert", async ({ messages }) => {
+        const msg = messages[0];
+        if (!msg.message) return;
 
-      console.log("Connected")
+        const from = msg.key.remoteJid;
 
-      if (!sock.authState.creds.registered && !requested) {
+        const text =
+            msg.message.conversation ||
+            msg.message.extendedTextMessage?.text ||
+            "";
 
-        requested = true
+        console.log("📩 Message:", text);
 
-        await delay(3000)
+        // ===== COMMANDS =====
+        if (text === "hi") {
+            await sock.sendMessage(from, {
+                text: "👋 Hello! GIMA-MD Bot Active 🚀"
+            });
+        }
 
-        const number = "94762964170"
+        if (text === "ping") {
+            await sock.sendMessage(from, {
+                text: "⚡ Pong! Bot is Alive"
+            });
+        }
 
-        const code =
-          await sock.requestPairingCode(number)
+        if (text === "menu") {
+            await sock.sendMessage(from, {
+                text: `
+🤖 GIMA-MD MENU
 
-        latestCode = code
+• hi - greeting
+• ping - check bot
+• menu - show menu
 
-        console.log("PAIR CODE:", code)
-      }
-    }
-
-    if (connection === "close") {
-
-      const reason =
-        lastDisconnect?.error?.output?.statusCode
-
-      console.log("Closed:", reason)
-
-      if (reason !== DisconnectReason.loggedOut) {
-        startBot()
-      }
-    }
-  })
+🚀 Railway Bot Running
+`
+            });
+        }
+    });
 }
 
-startBot()
+// =====================
+// START BOT
+// =====================
+startBot();
+
+// =====================
+// CRASH PREVENT FIX
+// =====================
+process.on("uncaughtException", (err) => {
+    console.log("Error:", err);
+});
+
+process.on("unhandledRejection", (err) => {
+    console.log("Unhandled:", err);
+});
