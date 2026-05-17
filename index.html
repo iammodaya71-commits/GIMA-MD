@@ -1,59 +1,47 @@
-pair-site/
- ├── index.js
- ├── package.json
- ├── Procfile
- └── views/
-      └── index.ejs
 const express = require("express")
-const bodyParser = require("body-parser")
-
 const app = express()
 
-app.set("view engine", "ejs")
-app.use(bodyParser.urlencoded({ extended: true }))
+const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys")
 
-// Home page
+app.use(express.urlencoded({ extended: true }))
+
+let sock
+
+// 🌐 Home Page (THIS is why site wasn't showing before)
 app.get("/", (req, res) => {
-    res.render("index")
-})
-
-// Pair request
-app.post("/pair", (req, res) => {
-    const number = req.body.number
-
-    if (!number) {
-        return res.send("❌ Number එක දාන්න")
-    }
-
-    // 👉 මෙතනට පස්සේ WhatsApp bot connect logic දාන්න පුළුවන්
     res.send(`
-        <h2>📲 Pair Request Sent</h2>
-        <p>Number: ${number}</p>
-        <p>Bot connection will be added next step 🔥</p>
+        <h1>📲 WhatsApp Pair Site</h1>
+        <form method="POST" action="/pair">
+            <input name="number" placeholder="Enter number (94xxxxxxx)" />
+            <button type="submit">Generate Pair</button>
+        </form>
     `)
 })
 
-const express = require("express")
-const bodyParser = require("body-parser")
-
-const app = express()
-
-app.set("view engine", "ejs")
-app.use(bodyParser.urlencoded({ extended: true }))
-
-app.get("/", (req, res) => {
-    res.render("index")
-})
-
-app.post("/pair", (req, res) => {
+// 🔑 Pair route
+app.post("/pair", async (req, res) => {
     const number = req.body.number
 
-    res.send("Number: " + number)
+    if (!number) return res.send("❌ Number missing")
+
+    const { state, saveCreds } = await useMultiFileAuthState('./session')
+
+    sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true
+    })
+
+    sock.ev.on("creds.update", saveCreds)
+
+    res.send(`
+        <h2>📲 Pair Started</h2>
+        <p>Check your terminal for QR code</p>
+    `)
 })
 
-// ⚠️ IMPORTANT PART
+// 🚀 Start server (IMPORTANT PART)
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
-    console.log("Pair site running on " + PORT)
+    console.log("🔥 Pair site running on port " + PORT)
 })
