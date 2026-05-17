@@ -1,72 +1,76 @@
-const express = require("express");
 const {
   default: makeWASocket,
-  useMultiFileAuthState,
-  DisconnectReason
-} = require("@whiskeysockets/baileys");
+  useMultiFileAuthState
+} = require("@whiskeysockets/baileys")
 
-const app = express();
+const P = require("pino")
+const express = require("express")
 
-app.use(express.urlencoded({ extended: true }));
+const app = express()
 
-let sock;
+app.get("/", (req, res) => {
+  res.send("GIMA-MD RUNNING")
+})
+
+app.listen(3000, () => {
+  console.log("Server Started")
+})
 
 async function startBot() {
-  const { state, saveCreds } = await useMultiFileAuthState("session");
 
-  sock = makeWASocket({
+  const { state, saveCreds } =
+    await useMultiFileAuthState("session")
+
+  const sock = makeWASocket({
+    logger: P({ level: "silent" }),
     auth: state,
-    printQRInTerminal: false
-  });
+    browser: ["GIMA-MD", "Chrome", "1.0.0"]
+  })
 
-  sock.ev.on("creds.update", saveCreds);
+  sock.ev.on("creds.update", saveCreds)
 
-  sock.ev.on("connection.update", ({ connection, lastDisconnect }) => {
+  if (!sock.authState.creds.registered) {
+
+    const phoneNumber = "947XXXXXXXX"
+
+    const code = await sock.requestPairingCode(phoneNumber)
+
+    console.log(`
+PAIR CODE: ${code}
+`)
+  }
+
+  sock.ev.on("connection.update", async ({ connection }) => {
+
     if (connection === "open") {
-      console.log("Bot connected");
+      console.log("BOT CONNECTED")
     }
 
     if (connection === "close") {
-      const shouldReconnect =
-        lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-
-      if (shouldReconnect) {
-        startBot();
-      }
+      console.log("RECONNECTING...")
+      startBot()
     }
-  });
+  })
+
+  sock.ev.on("messages.upsert", async (m) => {
+
+    const msg = m.messages[0]
+
+    if (!msg.message) return
+
+    const text =
+      msg.message.conversation ||
+      msg.message.extendedTextMessage?.text
+
+    const from = msg.key.remoteJid
+
+    if (text === ".ping") {
+
+      await sock.sendMessage(from, {
+        text: "Pong 🟢"
+      })
+    }
+  })
 }
 
-app.get("/", (req, res) => {
-  res.send(`
-    <h2>WhatsApp Pair Code</h2>
-    <form method="POST" action="/pair">
-      <input name="number" placeholder="947XXXXXXXX" />
-      <button type="submit">Get Pair Code</button>
-    </form>
-  `);
-});
-
-app.post("/pair", async (req, res) => {
-  try {
-    const number = req.body.number;
-
-    const code = await sock.requestPairingCode(number);
-
-    res.send(`
-      <h2>Your Pair Code</h2>
-      <h1>${code}</h1>
-    `);
-  } catch (err) {
-    res.send("Error generating pair code");
-    console.log(err);
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Server running on " + PORT);
-});
-
-startBot();
+startBot()
