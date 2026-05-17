@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log("Server Running On", PORT)
+  console.log("Server Running")
 })
 
 async function startBot() {
@@ -39,7 +39,7 @@ async function startBot() {
 
   sock.ev.on("creds.update", saveCreds)
 
-  let codeRequested = false
+  let requested = false
 
   sock.ev.on("connection.update", async (update) => {
 
@@ -47,11 +47,11 @@ async function startBot() {
 
     if (connection === "open") {
 
-      console.log("WhatsApp Connected")
+      console.log("Connected")
 
-      if (!sock.authState.creds.registered && !codeRequested) {
+      if (!sock.authState.creds.registered && !requested) {
 
-        codeRequested = true
+        requested = true
 
         await delay(3000)
 
@@ -71,7 +71,7 @@ async function startBot() {
       const reason =
         lastDisconnect?.error?.output?.statusCode
 
-      console.log("Connection Closed:", reason)
+      console.log("Closed:", reason)
 
       if (reason !== DisconnectReason.loggedOut) {
         startBot()
