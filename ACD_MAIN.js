@@ -15,3 +15,25 @@ await sock.sendMessage(from, {
 text: "Pong 🏓"
 }, { quoted: mek })
 }
+if (text == ".menu") {
+
+await sock.sendMessage(from, {
+text: `
+╭━━〔 *GIMA MD* 〕━━⬣
+┃✦ Owner : PAWAN
+┃✦ Prefix : .
+┃✦ Status : Online ✅
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *MAIN MENU* 〕━━⬣
+┃➤ .alive
+┃➤ .ping
+┃➤ .owner
+┃➤ .menu
+╰━━━━━━━━━━━━━━⬣
+
+> GIMA MD IS ONLINE ✅
+`
+}, { quoted: mek })
+
+}
