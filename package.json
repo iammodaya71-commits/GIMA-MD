@@ -1,12 +1,12 @@
 {
-  "name": "pair-server",
+  "name": "premium-whatsapp-bot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "qrcode": "^1.5.3"
+    "@whiskeysockets/baileys": "^6.7.0",
+    "express": "^4.18.2"
   }
 }
