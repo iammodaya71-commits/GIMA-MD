@@ -1,50 +1,25 @@
 const express = require("express")
 const app = express()
 
-const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys")
-
 app.use(express.urlencoded({ extended: true }))
 
-let sock
-
-// 🌐 Home Page (THIS is why site wasn't showing before)
 app.get("/", (req, res) => {
     res.send(`
-        <h1>📲 WhatsApp Pair Site</h1>
+        <h1>📲 Pair Site Working</h1>
         <form method="POST" action="/pair">
-            <input name="number" placeholder="Enter number (94xxxxxxx)" />
-            <button type="submit">Generate Pair</button>
+            <input name="number" placeholder="Enter number" />
+            <button>Pair</button>
         </form>
     `)
 })
 
-// 🔑 Pair route
-app.post("/pair", async (req, res) => {
+app.post("/pair", (req, res) => {
     const number = req.body.number
 
-    if (!number) return res.send("❌ Number missing")
-
-    const { state, saveCreds } = await useMultiFileAuthState('./session')
-
-    sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true
-    })
-
-    sock.ev.on("creds.update", saveCreds)
-
-    res.send(`
-        <h2>📲 Pair Started</h2>
-        <p>Check your terminal for QR code</p>
-    `)
+    res.send("Number received: " + number)
 })
 
-// 🚀 Start server (IMPORTANT PART)
-const PORT = process.env.PORT || 3000
-
-app.listen(PORT, () => {
-    console.log("🔥 Pair site running on port " + PORT)
-})
+// ⚠️ VERY IMPORTANT
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
