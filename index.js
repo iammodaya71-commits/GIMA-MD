@@ -113,3 +113,22 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (err) => {
     console.log("Unhandled:", err);
 });
+const express = require("express");
+const app = express();
+
+const pairRoute = require("./routes/pair");
+
+app.use(express.json());
+
+// home route
+app.get("/", (req, res) => {
+    res.send("🔥 Koyeb Pair Server Running");
+});
+
+// pair API
+app.use("/pair", pairRoute);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log("🚀 Pair server running on port " + PORT);
+});
