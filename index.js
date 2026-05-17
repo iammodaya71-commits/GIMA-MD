@@ -1,18 +1,15 @@
 const express = require("express");
-const axios = require("axios");
 const {
     default: makeWASocket,
     useMultiFileAuthState,
     DisconnectReason
 } = require("@whiskeysockets/baileys");
 
-// =====================
-// KEEP ALIVE SERVER
-// =====================
 const app = express();
 
+// ================= KEEP ALIVE =================
 app.get("/", (req, res) => {
-    res.send("GIMA-MD Bot is Running ✅");
+    res.send("💎 Premium Bot Running 24/7");
 });
 
 const PORT = process.env.PORT || 3000;
@@ -20,22 +17,22 @@ app.listen(PORT, () => {
     console.log("🌐 Server running on port " + PORT);
 });
 
-// =====================
-// MAIN BOT FUNCTION
-// =====================
+// ================= OWNER INFO =================
+const OWNER_NUMBER = "94762964170"; // 👈 ඔයාගේ number දාන්න
+
+// ================= BOT START =================
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState("./auth");
 
     const sock = makeWASocket({
         auth: state,
         printQRInTerminal: true,
-        browser: ["GIMA-MD", "Chrome", "1.0.0"]
+        browser: ["PremiumBot", "Chrome", "1.0.0"]
     });
 
-    // Save session
     sock.ev.on("creds.update", saveCreds);
 
-    // Connection update (auto reconnect fix)
+    // ================= CONNECTION FIX =================
     sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect } = update;
 
@@ -43,19 +40,17 @@ async function startBot() {
             const shouldReconnect =
                 lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
 
-            console.log("Connection closed. Reconnecting...", shouldReconnect);
+            console.log("🔁 Reconnecting...", shouldReconnect);
 
-            if (shouldReconnect) {
-                startBot();
-            }
-        } else if (connection === "open") {
-            console.log("✅ Bot Connected Successfully");
+            if (shouldReconnect) startBot();
+        }
+
+        if (connection === "open") {
+            console.log("✅ PREMIUM BOT ONLINE");
         }
     });
 
-    // =====================
-    // MESSAGE HANDLER
-    // =====================
+    // ================= MESSAGE HANDLER =================
     sock.ev.on("messages.upsert", async ({ messages }) => {
         const msg = messages[0];
         if (!msg.message) return;
@@ -67,68 +62,65 @@ async function startBot() {
             msg.message.extendedTextMessage?.text ||
             "";
 
-        console.log("📩 Message:", text);
+        const isOwner = from.includes(OWNER_NUMBER);
 
-        // ===== COMMANDS =====
+        console.log("📩:", text);
+
+        // ================= COMMANDS =================
+
         if (text === "hi") {
             await sock.sendMessage(from, {
-                text: "👋 Hello! GIMA-MD Bot Active 🚀"
-            });
-        }
-
-        if (text === "ping") {
-            await sock.sendMessage(from, {
-                text: "⚡ Pong! Bot is Alive"
+                text: "👋 Hello! I am Premium Bot 💎"
             });
         }
 
         if (text === "menu") {
             await sock.sendMessage(from, {
                 text: `
-🤖 GIMA-MD MENU
+💎 PREMIUM BOT MENU
 
-• hi - greeting
-• ping - check bot
-• menu - show menu
+⚡ hi - greeting
+⚡ ping - check bot
+⚡ menu - commands
+⚡ owner - owner info
+⚡ alive - uptime check
 
-🚀 Railway Bot Running
+🚀 Powered by Premium System
 `
             });
+        }
+
+        if (text === "ping") {
+            await sock.sendMessage(from, {
+                text: "⚡ Pong! Bot Alive 24/7"
+            });
+        }
+
+        if (text === "alive") {
+            await sock.sendMessage(from, {
+                text: "💎 Bot is Running Smoothly 🚀"
+            });
+        }
+
+        if (text === "owner") {
+            await sock.sendMessage(from, {
+                text: `👑 Owner Number: ${OWNER_NUMBER}`
+            });
+        }
+
+        // ================= OWNER ONLY CMD =================
+        if (text === "restart" && isOwner) {
+            await sock.sendMessage(from, {
+                text: "♻️ Restarting Bot..."
+            });
+            process.exit(1);
         }
     });
 }
 
-// =====================
-// START BOT
-// =====================
+// ================= START =================
 startBot();
 
-// =====================
-// CRASH PREVENT FIX
-// =====================
-process.on("uncaughtException", (err) => {
-    console.log("Error:", err);
-});
-
-process.on("unhandledRejection", (err) => {
-    console.log("Unhandled:", err);
-});
-const express = require("express");
-const app = express();
-
-const pairRoute = require("./routes/pair");
-
-app.use(express.json());
-
-// home route
-app.get("/", (req, res) => {
-    res.send("🔥 Koyeb Pair Server Running");
-});
-
-// pair API
-app.use("/pair", pairRoute);
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log("🚀 Pair server running on port " + PORT);
-});
+// ================= CRASH GUARD =================
+process.on("uncaughtException", () => {});
+process.on("unhandledRejection", () => {});
