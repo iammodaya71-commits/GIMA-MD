@@ -1,24 +1,19 @@
 if (text == ".alive") {
-await sock.sendMessage(from, {
-text: "GIMA MD IS ONLINE ✅"
-}, { quoted: mek })
-}
 
-if (text == ".owner") {
 await sock.sendMessage(from, {
-text: "OWNER : PAWAN\nNUMBER : 94762964170"
-}, { quoted: mek })
-}
+image: { url: "https://raw.githubusercontent.com/iammodaya71-commits/GIMA-MD/main/logo.png" },
 
-if (text == ".ping") {
-await sock.sendMessage(from, {
-text: "Pong 🏓"
+caption: "GIMA MD IS ONLINE ✅"
+
 }, { quoted: mek })
+
 }
 if (text == ".menu") {
 
 await sock.sendMessage(from, {
-text: `
+image: { url: "https://raw.githubusercontent.com/iammodaya71-commits/GIMA-MD/main/logo.png" },
+
+caption: `
 ╭━━〔 *GIMA MD* 〕━━⬣
 ┃✦ Owner : PAWAN
 ┃✦ Prefix : .
@@ -26,10 +21,55 @@ text: `
 ╰━━━━━━━━━━━━━━⬣
 
 ╭━━〔 *MAIN MENU* 〕━━⬣
+┃➤ .menu
 ┃➤ .alive
 ┃➤ .ping
 ┃➤ .owner
-┃➤ .menu
+┃➤ .repo
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *DOWNLOAD MENU* 〕━━⬣
+┃➤ .song
+┃➤ .video
+┃➤ .tiktok
+┃➤ .fb
+┃➤ .play
+┃➤ .ytmp3
+┃➤ .ytmp4
+┃➤ .moviepro
+┃➤ .cinesubz
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *GROUP MENU* 〕━━⬣
+┃➤ .kick
+┃➤ .add
+┃➤ .promote
+┃➤ .demote
+┃➤ .tagall
+┃➤ .hidetag
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *FUN MENU* 〕━━⬣
+┃➤ .anime
+┃➤ .joke
+┃➤ .truth
+┃➤ .dare
+┃➤ .quote
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *TOOLS MENU* 〕━━⬣
+┃➤ .sticker
+┃➤ .take
+┃➤ .img
+┃➤ .ai
+┃➤ .logo
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 *OWNER MENU* 〕━━⬣
+┃➤ .restart
+┃➤ .shutdown
+┃➤ .block
+┃➤ .unblock
 ╰━━━━━━━━━━━━━━⬣
 
 > GIMA MD IS ONLINE ✅
